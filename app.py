@@ -64,6 +64,46 @@ def sync_to_google_sheets(df):
     creds = Credentials.from_service_account_info(
         creds_dict,
         scopes=[
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive"
+        ]
+    )
+    
+    client = gspread.authorize(creds)
+    
+    # スプレッドシートを開く（なければ作成）
+    try:
+        spreadsheet = client.open(SPREADSHEET_NAME)
+    except gspread.SpreadsheetNotFound:
+        spreadsheet = client.create(SPREADSHEET_NAME)
+        spreadsheet.share('', perm_type='anyone', role='reader')  # 読み取り専用で共有
+    
+    worksheet = spreadsheet.sheet1
+    
+    # データをクリアして書き込み
+    worksheet.clear()
+    worksheet.update([df.columns.values.tolist()] + df.values.tolist())
+
+# --- UI構築 ---
+st.title("🗳️ アイデア投票アプリ")
+st.markdown("以下の10個の案から、最も良いと思うものに投票してください。")
+
+# 1. 投票セクション
+st.header("投票する")
+selected_option = st.radio("どの案に投票しますか？", CANDIDATES)
+
+if st.button("投票を送信"):
+    save_vote(selected_option)
+    st.success(f"「{selected_option}」に投票しました！ありがとうございます。")
+
+st.markdown("---")
+
+# 2. 結果開示セクション（パスワード保護）
+st.header("集計結果（管理者のみ）")
+st.markdown("結果は開示されるまで伏せられています。")
+
+input_pass = st.text_input("開示パスワードを入力してください", type="password")
+
 if input_pass == ADMIN_PASSWORD:
     st.success("認証成功：結果を表示します")
     
@@ -100,46 +140,6 @@ if input_pass == ADMIN_PASSWORD:
                 if reset_votes():
                     st.success("投票データをリセットしました")
                     st.rerun()
-    else:
-        st.info("まだ投票はありません。")
-elif input_pass:
-    st.error("パスワードが違います。")
-else:
-    st.info("🔒 結果は非表示です")
-st.title("🗳️ アイデア投票アプリ")
-st.markdown("以下の10個の案から、最も良いと思うものに投票してください。")
-
-# 1. 投票セクション
-st.header("投票する")
-selected_option = st.radio("どの案に投票しますか？", CANDIDATES)
-
-if st.button("投票を送信"):
-    save_vote(selected_option)
-    st.success(f"「{selected_option}」に投票しました！ありがとうございます。")
-
-st.markdown("---")
-
-# 2. 結果開示セクション（パスワード保護）
-st.header("集計結果（管理者のみ）")
-st.markdown("結果は開示されるまで伏せられています。")
-
-input_pass = st.text_input("開示パスワードを入力してください", type="password")
-
-if input_pass == ADMIN_PASSWORD:
-    st.success("認証成功：結果を表示します")
-    
-    df = load_data()
-    if not df.empty:
-        # 集計
-        vote_counts = df["candidate"].value_counts()
-        
-        # グラフ表示
-        st.bar_chart(vote_counts)
-        
-        # 表で詳細表示
-        st.write("詳細データ:")
-        st.dataframe(vote_counts)
-        st.metric("総投票数", len(df))
     else:
         st.info("まだ投票はありません。")
 elif input_pass:
