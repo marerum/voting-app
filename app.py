@@ -77,7 +77,7 @@ def sync_to_google_sheets(df):
     
     # データをクリアして書き込み
     worksheet.clear()
-    worksheet.update([df.columns.values.tolist()] + df.values.tolist()])
+    worksheet.update([df.columns.values.tolist()] + df.values.tolist())
 
 # --- UI構築 ---
 st.title("🗳️ アイデア投票アプリ")
