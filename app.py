@@ -75,9 +75,12 @@ def sync_to_google_sheets(df):
     spreadsheet = client.open(SPREADSHEET_NAME)
     worksheet = spreadsheet.sheet1
     
+    # NaN値を空文字列に置換
+    df_clean = df.fillna('')
+    
     # データをクリアして書き込み
     worksheet.clear()
-    worksheet.update([df.columns.values.tolist()] + df.values.tolist())
+    worksheet.update([df_clean.columns.values.tolist()] + df_clean.values.tolist())
 
 # --- UI構築 ---
 st.title("🗳️ アイデア投票アプリ")
