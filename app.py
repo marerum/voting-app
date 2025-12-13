@@ -71,18 +71,13 @@ def sync_to_google_sheets(df):
     
     client = gspread.authorize(creds)
     
-    # スプレッドシートを開く（なければ作成）
-    try:
-        spreadsheet = client.open(SPREADSHEET_NAME)
-    except gspread.SpreadsheetNotFound:
-        spreadsheet = client.create(SPREADSHEET_NAME)
-        spreadsheet.share('', perm_type='anyone', role='reader')  # 読み取り専用で共有
-    
+    # スプレッドシートを開く（既存のものを使用）
+    spreadsheet = client.open(SPREADSHEET_NAME)
     worksheet = spreadsheet.sheet1
     
     # データをクリアして書き込み
     worksheet.clear()
-    worksheet.update([df.columns.values.tolist()] + df.values.tolist())
+    worksheet.update([df.columns.values.tolist()] + df.values.tolist()])
 
 # --- UI構築 ---
 st.title("🗳️ アイデア投票アプリ")
