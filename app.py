@@ -26,7 +26,7 @@ DATA_FILE = "votes.csv"
 ADMIN_PASSWORD = "secret_open"
 
 # Google Sheets連携設定（オプション）
-ENABLE_GOOGLE_SHEETS = False  # Trueにすると連携有効
+ENABLE_GOOGLE_SHEETS = True  # Trueにすると連携有効
 SPREADSHEET_NAME = "投票結果"  # スプレッドシート名
 
 # --- 関数: データの読み書き ---
